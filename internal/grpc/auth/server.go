@@ -29,14 +29,11 @@ type Auth interface {
 	) (userID int64, err error)
 }
 
-func Register(gRPCServer *grpc.Server, auth Auth) {
-	ssov1.RegisterAuthServer(gRPCServer, &serverAPI{auth: auth})
+func Register(gRPC *grpc.Server) {
+	ssov1.RegisterAuthServer(gRPC, &serverAPI{})
 }
 
-func (s *serverAPI) Login(
-	ctx context.Context,
-	in *ssov1.LoginRequest,
-) (*ssov1.LoginResponse, error) {
+func (s *serverAPI) Login(ctx context.Context, in *ssov1.LoginRequest) (*ssov1.LoginResponse, error) {
 	if in.Email == "" {
 		return nil, status.Error(codes.InvalidArgument, "email is required")
 	}
@@ -61,10 +58,7 @@ func (s *serverAPI) Login(
 	return &ssov1.LoginResponse{Token: token}, nil
 }
 
-func (s *serverAPI) Register(
-	ctx context.Context,
-	in *ssov1.RegisterRequest,
-) (*ssov1.RegisterResponse, error) {
+func (s *serverAPI) Register(ctx context.Context, in *ssov1.RegisterRequest) (*ssov1.RegisterResponse, error) {
 	if in.Email == "" {
 		return nil, status.Error(codes.InvalidArgument, "email is required")
 	}
