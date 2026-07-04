@@ -3,6 +3,8 @@ package auth
 import (
 	"context"
 	"errors"
+	"sso/internal/services/auth"
+	"sso/internal/services/storage"
 
 	ssov1 "github.com/seWy-bit/protos/gen/go/sso"
 	"google.golang.org/grpc"
@@ -87,7 +89,9 @@ func (s *serverAPI) IsAdmin(ctx context.Context, req *ssov1.IsAdminRequest) (*ss
 
 	isAdmin, err := s.auth.IsAdmin(ctx, req.GetUserId())
 	if err != nil {
-		// TODO: handle error properly
+		if errors.Is(err, auth.ErrInvalidCredentials) {
+			return nil, status.Error(codes.NotFound, "user not found")
+		}
 		return nil, status.Error(codes.Internal, "failed to check if user is admin")
 	}
 
