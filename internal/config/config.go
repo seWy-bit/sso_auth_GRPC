@@ -27,6 +27,11 @@ func MustLoad() *Config {
 		panic("config path is empty")
 	}
 
+	return MustLoadPath(configPath)
+}
+
+func MustLoadPath(configPath string) *Config {
+	// check if file exists
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		panic("config file does not exist: " + configPath)
 	}
@@ -34,7 +39,7 @@ func MustLoad() *Config {
 	var cfg Config
 
 	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		panic("config path is empty: " + err.Error())
+		panic("cannot read config: " + err.Error())
 	}
 
 	return &cfg

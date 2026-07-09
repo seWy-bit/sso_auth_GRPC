@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"sso/internal/domain/models"
 	"sso/internal/storage"
+	"strings"
 
-	"modernc.org/sqlite"
-	sqlite3 "modernc.org/sqlite/lib"
+	_ "modernc.org/sqlite"
 )
 
 type Storage struct {
@@ -39,12 +39,8 @@ func (s *Storage) SaveUser(ctx context.Context, email string, passHash []byte) (
 
 	res, err := stmt.ExecContext(ctx, email, passHash)
 	if err != nil {
-		var sqliteErr *sqlite.Error
-
-		if errors.As(err, &sqliteErr) {
-			if sqliteErr.Code() == sqlite3.SQLITE_CONSTRAINT_UNIQUE {
-				return 0, fmt.Errorf("%s: %w", op, storage.ErrUserExists)
-			}
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+			return 0, fmt.Errorf("%s: %w", op, storage.ErrUserExists)
 		}
 
 		return 0, fmt.Errorf("%s: %w", op, err)

@@ -128,20 +128,20 @@ func (a *Auth) RegisterNewUser(ctx context.Context, email string, password strin
 	if err != nil {
 		log.Error("failed to generate password hash", sl.Err(err))
 
-		return 0, fmt.Errorf("%s: failed to generate password hash: %w", op, err)
+		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
 	uid, err := a.usrSaver.SaveUser(ctx, email, passHash)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserExists) {
-			log.Info("user already exists", sl.Err(err))
+			log.Error("user already exists", sl.Err(err))
 
-			return 0, fmt.Errorf("%s: %w", op, ErrUserExists)
+			return 0, fmt.Errorf("%s: %w", op, storage.ErrUserExists)
 		}
 
 		log.Error("failed to save user", sl.Err(err))
 
-		return 0, fmt.Errorf("%s: failed to save user: %w", op, err)
+		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
 	log.Info("user registered successfully")
