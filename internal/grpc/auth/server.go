@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"sso/internal/services/auth"
-	"strings"
 
 	ssov1 "github.com/seWy-bit/protos/gen/go/sso"
 	"google.golang.org/grpc"
@@ -72,7 +71,7 @@ func (s *serverAPI) Register(ctx context.Context, req *ssov1.RegisterRequest) (*
 
 	uid, err := s.auth.RegisterNewUser(ctx, req.GetEmail(), req.GetPassword())
 	if err != nil {
-		if strings.Contains(err.Error(), "user already exists") {
+		if errors.Is(err, auth.ErrUserExists) {
 			return nil, status.Error(codes.AlreadyExists, "user already exists")
 		}
 
